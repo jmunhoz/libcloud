@@ -1004,3 +1004,18 @@ class S3SAEastStorageDriver(S3StorageDriver):
     name = 'Amazon S3 (sa-east-1)'
     connectionCls = S3SAEastConnection
     ex_location_name = 'sa-east-1'
+
+
+class S3CephConnection(SignedAWSConnection):
+    pass
+
+
+class S3CephStorageDriver(S3StorageDriver):
+    name = 'Ceph RGW S3'
+    connectionCls = S3CephConnection
+    ex_location_name = 'ceph'
+
+    def __init__(self, host, region_name, port=80):
+        self.host = host
+        self.port = port
+        self.region_name = region_name

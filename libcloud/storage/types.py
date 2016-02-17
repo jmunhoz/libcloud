@@ -37,6 +37,7 @@ class Provider(object):
     :cvar S3_EU_WEST: Amazon S3 EU West (Ireland)
     :cvar S3_AP_SOUTHEAST_HOST: Amazon S3 Asia South East (Singapore)
     :cvar S3_AP_NORTHEAST_HOST: Amazon S3 Asia South East (Tokyo)
+    :cvar S3_CEPH_RGW: Ceph RGW S3
     :cvar NINEFOLD: Ninefold
     :cvar GOOGLE_STORAGE Google Storage
     :cvar S3_US_WEST_OREGON: Amazon S3 US West 2 (Oregon)
@@ -53,6 +54,7 @@ class Provider(object):
     S3_AP_NORTHEAST1 = 's3_ap_northeast_1'
     S3_AP_NORTHEAST2 = 's3_ap_northeast_2'
     S3_SA_EAST = 's3_sa_east'
+    S3_CEPH_RGW = 's3_ceph_rgw'
     NINEFOLD = 'ninefold'
     GOOGLE_STORAGE = 'google_storage'
     S3_US_WEST_OREGON = 's3_us_west_oregon'
