@@ -18,6 +18,7 @@ from datetime import datetime
 import hashlib
 import hmac
 import time
+from hashlib import sha1
 from hashlib import sha256
 
 try:
@@ -193,6 +194,10 @@ class AWSRequestSigner(object):
 
 class AWSRequestSignerAlgorithmV2(AWSRequestSigner):
     def get_request_params(self, params, method='GET', path='/'):
+        if self.version == '2006-03-01':
+            params['AWSAccessKeyId'] = self.access_key
+            params['SignatureMethod'] = 'HmacSHA1'
+            return params
         params['SignatureVersion'] = '2'
         params['SignatureMethod'] = 'HmacSHA256'
         params['AWSAccessKeyId'] = self.access_key
@@ -204,6 +209,18 @@ class AWSRequestSignerAlgorithmV2(AWSRequestSigner):
             secret_key=self.access_secret,
             path=path)
         return params
+
+    def get_request_headers(self, params, headers, method='GET', path='/', data=None):
+        if self.version == '2006-03-01':
+            params['Signature'] = self._get_auth_signature_api_20060301(
+                                            method=method,
+                                            headers=headers,
+                                            params=params,
+                                            expires=params['Expires'],
+                                            secret_key=self.access_secret,
+                                            path=path,
+                                            vendor_prefix='x-amz')
+            return params, headers
 
     def _get_aws_auth_param(self, params, secret_key, path='/'):
         """
@@ -239,6 +256,53 @@ class AWSRequestSignerAlgorithmV2(AWSRequestSigner):
                      digestmod=sha256).digest()
         )
 
+        return b64_hmac.decode('utf-8')
+
+    def _get_auth_signature_api_20060301(self, method, headers, params, expires,
+                                         secret_key, path, vendor_prefix):
+        """
+        Signature = URL-Encode( Base64( HMAC-SHA1( YourSecretAccessKeyID,
+                                    UTF-8-Encoding-Of( StringToSign ) ) ) );
+
+        StringToSign = HTTP-VERB + "\n" +
+            Content-MD5 + "\n" +
+            Content-Type + "\n" +
+            Expires + "\n" +
+            CanonicalizedVendorHeaders +
+            CanonicalizedResource;
+        """
+        special_headers = {'content-md5': '', 'content-type': '', 'date': ''}
+        vendor_headers = {}
+
+        for key, value in list(headers.items()):
+            key_lower = key.lower()
+            if key_lower in special_headers:
+                special_headers[key_lower] = value.strip()
+            elif key_lower.startswith(vendor_prefix):
+                vendor_headers[key_lower] = value.strip()
+
+        if expires:
+            special_headers['date'] = str(expires)
+
+        buf = [method]
+        for _, value in sorted(special_headers.items()):
+            buf.append(value)
+        string_to_sign = '\n'.join(buf)
+
+        buf = []
+        for key, value in sorted(vendor_headers.items()):
+            buf.append('%s:%s' % (key, value))
+        header_string = '\n'.join(buf)
+
+        values_to_sign = []
+        for value in [string_to_sign, header_string, path]:
+            if value:
+                values_to_sign.append(value)
+
+        string_to_sign = '\n'.join(values_to_sign)
+        b64_hmac = base64.b64encode(
+                        hmac.new(b(secret_key), b(string_to_sign), digestmod=sha1).digest()
+        )
         return b64_hmac.decode('utf-8')
 
 
