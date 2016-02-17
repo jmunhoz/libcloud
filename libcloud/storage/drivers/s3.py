@@ -36,7 +36,7 @@ from libcloud.utils.files import read_in_chunks
 from libcloud.common.types import InvalidCredsError, LibcloudError
 from libcloud.common.base import ConnectionUserAndKey, RawResponse
 from libcloud.common.aws import AWSBaseResponse, AWSDriver, \
-    AWSTokenConnection, SignedAWSConnection
+    AWSTokenConnection, SignedAWSConnection, DEFAULT_SIGNATURE_VERSION
 
 from libcloud.storage.base import Object, Container, StorageDriver
 from libcloud.storage.types import ContainerError
@@ -1006,16 +1006,31 @@ class S3SAEastStorageDriver(S3StorageDriver):
     ex_location_name = 'sa-east-1'
 
 
-class S3CephConnection(SignedAWSConnection):
-    pass
+class S3CephConnection(SignedAWSConnection, BaseS3Connection):
+    service_name = 's3'
+    version = API_VERSION
+
+    def __init__(self, user_id, key, secure=True, host=None, port=None,
+                 url=None, timeout=None, proxy_url=None, token=None,
+                 retry_delay=None, backoff=None, region=None,
+                 signature_version=None):
+
+        if host is None:
+            raise ValueError('host required')
+
+        super(S3CephConnection, self).__init__(user_id, key, secure, host,
+                                               port, url, timeout, proxy_url,
+                                               token, retry_delay, backoff,
+                                               signature_version)
+
+    def add_default_params(self, params):
+        params['Expires'] = str(int(time.time()) + EXPIRATION_SECONDS)
+        params = super(S3CephConnection, self).add_default_params(params)
+        return params
 
 
 class S3CephStorageDriver(S3StorageDriver):
     name = 'Ceph RGW S3'
     connectionCls = S3CephConnection
     ex_location_name = 'ceph'
-
-    def __init__(self, host, region_name, port=80):
-        self.host = host
-        self.port = port
-        self.region_name = region_name
+    region_name = 'us-east-1'

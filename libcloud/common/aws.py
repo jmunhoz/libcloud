@@ -349,8 +349,7 @@ class AWSRequestSignerAlgorithmV4(AWSRequestSigner):
 class SignedAWSConnection(AWSTokenConnection):
     def __init__(self, user_id, key, secure=True, host=None, port=None,
                  url=None, timeout=None, proxy_url=None, token=None,
-                 retry_delay=None, backoff=None,
-                 signature_version=DEFAULT_SIGNATURE_VERSION):
+                 retry_delay=None, backoff=None, signature_version=None):
         super(SignedAWSConnection, self).__init__(user_id=user_id, key=key,
                                                   secure=secure, host=host,
                                                   port=port, url=url,
@@ -358,6 +357,8 @@ class SignedAWSConnection(AWSTokenConnection):
                                                   retry_delay=retry_delay,
                                                   backoff=backoff,
                                                   proxy_url=proxy_url)
+        if signature_version is None:
+            signature_version = DEFAULT_SIGNATURE_VERSION
         self.signature_version = str(signature_version)
 
         if self.signature_version == '2':

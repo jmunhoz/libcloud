@@ -1137,7 +1137,8 @@ class BaseDriver(object):
         conn_kwargs.update({'timeout': kwargs.pop('timeout', None),
                             'retry_delay': kwargs.pop('retry_delay', None),
                             'backoff': kwargs.pop('backoff', None),
-                            'proxy_url': kwargs.pop('proxy_url', None)})
+                            'proxy_url': kwargs.pop('proxy_url', None),
+                            'signature_version' : kwargs.pop('signature_version', None)})
         self.connection = self.connectionCls(*args, **conn_kwargs)
 
         self.connection.driver = self
