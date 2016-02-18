@@ -44,6 +44,8 @@ DRIVERS = {
     ('libcloud.storage.drivers.s3', 'S3SAEastStorageDriver'),
     Provider.S3_CEPH_RGW:
     ('libcloud.storage.drivers.s3', 'S3CephStorageDriver'),
+    Provider.S3_CEPH_RGW_PROVIDERNAME_US_EAST:
+    ('libcloud.storage.drivers.s3', 'ProvidernameUSEStorageDriver'),
     Provider.NINEFOLD:
     ('libcloud.storage.drivers.ninefold', 'NinefoldStorageDriver'),
     Provider.GOOGLE_STORAGE:

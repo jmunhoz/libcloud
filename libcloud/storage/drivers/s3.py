@@ -60,6 +60,8 @@ S3_AP_NORTHEAST2_HOST = 's3-ap-northeast-2.amazonaws.com'
 S3_AP_NORTHEAST_HOST = S3_AP_NORTHEAST1_HOST
 S3_SA_EAST_HOST = 's3-sa-east-1.amazonaws.com'
 
+PROVIDERNAME_USE_HOST = 's3.amazonaws.com'
+
 API_VERSION = '2006-03-01'
 NAMESPACE = 'http://s3.amazonaws.com/doc/%s/' % (API_VERSION)
 
@@ -1009,14 +1011,12 @@ class S3SAEastStorageDriver(S3StorageDriver):
 class S3CephConnection(SignedAWSConnection, BaseS3Connection):
     service_name = 's3'
     version = API_VERSION
+    host = S3_US_STANDARD_HOST
 
     def __init__(self, user_id, key, secure=True, host=None, port=None,
                  url=None, timeout=None, proxy_url=None, token=None,
                  retry_delay=None, backoff=None, region=None,
                  signature_version=None):
-
-        if host is None:
-            raise ValueError('host required')
 
         super(S3CephConnection, self).__init__(user_id, key, secure, host,
                                                port, url, timeout, proxy_url,
@@ -1033,4 +1033,14 @@ class S3CephStorageDriver(S3StorageDriver):
     name = 'Ceph RGW S3'
     connectionCls = S3CephConnection
     ex_location_name = 'ceph'
+    region_name = 'us-east-1'
+
+
+class ProvidernameUSEConnection(S3CephConnection):
+    host = PROVIDERNAME_USE_HOST
+
+
+class ProvidernameUSEStorageDriver(S3CephStorageDriver):
+    name = "Provider name"
+    ex_location_name = 'provider location'
     region_name = 'us-east-1'
